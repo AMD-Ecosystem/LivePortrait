@@ -127,6 +127,20 @@ pip install -r requirements.txt
 pip install -r requirements_macOS.txt
 ```
 
+#### 对于AMD GPU（ROCm）用户
+
+安装ROCm版本的PyTorch（而不是CUDA版本），例如在Linux上：
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm7.2
+```
+在Windows上，请按照[ROCm文档](https://rocm.docs.amd.com/)为您的GPU安装ROCm版本的PyTorch，并使用Python 3.11或更高版本。然后安装其余依赖项：
+```bash
+pip install -r requirements_rocm.txt
+```
+在Linux上，人脸检测和关键点模型通过ONNX Runtime的MIGraphX执行提供程序在GPU上运行，这需要ROCm安装中的MIGraphX运行时（例如`sudo apt install migraphx`）。MIGraphX在首次使用时会编译每个ONNX模型，大约需要一分钟；将环境变量`ORT_MIGRAPHX_MODEL_CACHE_PATH`设置为一个目录，即可在之后的运行中复用编译结果。如果没有MIGraphX运行时，或在Windows上（ONNX Runtime没有ROCm执行提供程序），这些模型会回退到CPU运行；肖像动画网络仍在GPU上运行。
+
+在部分AMD GPU上（在Radeon PRO W7800上观察到），动物模式使用半精度时会出现黑块，原因是MIOpen中的FP16 Winograd卷积溢出。请使用`--no_flag_use_half_precision`运行，或设置环境变量`MIOPEN_DEBUG_AMD_WINOGRAD_FURY_RXS_F2X3=0`以保留半精度。
+
 ### 2. 下载预训练权重(Pretrained weights) 📥
 
 从HuggingFace下载预训练权重的最简单方法是：
@@ -179,7 +193,7 @@ python inference.py -h
 
 #### 快速上手（动物模型） 🐱🐶
 
-动物模式仅在Linux和Windows上经过测试，并且需要NVIDIA GPU。
+动物模式仅在Linux和Windows上使用NVIDIA GPU，以及在Linux上使用AMD GPU（ROCm）经过测试。
 
 您需要首先构建一个名为`MultiScaleDeformableAttention`的OP，该OP由[X-Pose](https://github.com/IDEA-Research/X-Pose)使用，这是一个通用的关键点检测框架。
 
@@ -188,6 +202,7 @@ cd src/utils/dependencies/XPose/models/UniPose/ops
 python setup.py build install
 cd - # 等同于 cd ../../../../../../../
 ```
+使用ROCm版本的PyTorch时，同样的命令即可为AMD GPU构建该OP。
 
 然后执行
 ```bash

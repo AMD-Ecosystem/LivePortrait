@@ -128,6 +128,19 @@ The [X-Pose](https://github.com/IDEA-Research/X-Pose) dependency does not suppor
 pip install -r requirements_macOS.txt
 ```
 
+#### For AMD GPU (ROCm) Users
+Install the ROCm build of PyTorch instead of the CUDA one, for example on Linux:
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm7.2
+```
+On Windows, install the ROCm PyTorch wheels for your GPU as described in the [ROCm documentation](https://rocm.docs.amd.com/), using Python 3.11 or newer. Then install the remaining dependencies:
+```bash
+pip install -r requirements_rocm.txt
+```
+On Linux, face detection and landmarks run on the GPU through the ONNX Runtime MIGraphX execution provider, which needs the MIGraphX runtime from your ROCm installation (e.g. `sudo apt install migraphx`). MIGraphX compiles each ONNX model on first use, which takes about a minute; set the `ORT_MIGRAPHX_MODEL_CACHE_PATH` environment variable to a directory to reuse the compiled models in later runs. Without the MIGraphX runtime, and on Windows, where ONNX Runtime has no ROCm execution provider, these models fall back to the CPU; the portrait animation networks still run on the GPU.
+
+On some AMD GPUs (seen on a Radeon PRO W7800), Animals mode with half precision produces black boxes because an FP16 Winograd convolution in MIOpen overflows. Run it with `--no_flag_use_half_precision`, or set the environment variable `MIOPEN_DEBUG_AMD_WINOGRAD_FURY_RXS_F2X3=0` to keep half precision.
+
 ### 2. Download pretrained weights 📥
 
 The easiest way to download the pretrained weights is from HuggingFace:
@@ -178,7 +191,7 @@ python inference.py -h
 ```
 
 #### Fast hands-on (animals) 🐱🐶
-Animals mode is ONLY tested on Linux and Windows with NVIDIA GPU.
+Animals mode is ONLY tested on Linux and Windows with NVIDIA GPU, and on Linux with AMD GPU (ROCm).
 
 You need to build an OP named `MultiScaleDeformableAttention` first (refer to the <a href="#for-linux--or-windows--users">Check your CUDA versions</a> if needed), which is used by [X-Pose](https://github.com/IDEA-Research/X-Pose), a general keypoint detection framework.
 
@@ -187,6 +200,7 @@ cd src/utils/dependencies/XPose/models/UniPose/ops
 python setup.py build install
 cd - # equal to cd ../../../../../../../
 ```
+With the ROCm build of PyTorch, the same commands build the OP for AMD GPUs.
 
 Then
 ```bash
