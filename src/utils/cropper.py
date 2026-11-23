@@ -19,7 +19,7 @@ from .crop import (
 from .io import contiguous
 from .rprint import rlog as log
 from .face_analysis_diy import FaceAnalysisDIY
-from .human_landmark_runner import LandmarkRunner as HumanLandmark
+from .human_landmark_runner import LandmarkRunner as HumanLandmark, get_gpu_onnx_provider
 
 def make_abs_path(fn):
     return osp.join(osp.dirname(osp.realpath(__file__)), fn)
@@ -56,10 +56,10 @@ class Cropper(object):
                     face_analysis_wrapper_provider = ["CPUExecutionProvider"]
                 else:
                     device = "cuda"
-                    face_analysis_wrapper_provider = ["CUDAExecutionProvider"]
+                    face_analysis_wrapper_provider = [get_gpu_onnx_provider()]
             except:
                     device = "cuda"
-                    face_analysis_wrapper_provider = ["CUDAExecutionProvider"]
+                    face_analysis_wrapper_provider = [get_gpu_onnx_provider()]
         self.face_analysis_wrapper = FaceAnalysisDIY(
                     name="buffalo_l",
                     root=self.crop_cfg.insightface_root,

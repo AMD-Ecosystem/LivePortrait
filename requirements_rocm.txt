@@ -1,0 +1,4 @@
+-r requirements_base.txt
+
+onnxruntime-migraphx==1.27.1; sys_platform == "linux"
+onnxruntime==1.27.0; sys_platform == "win32"

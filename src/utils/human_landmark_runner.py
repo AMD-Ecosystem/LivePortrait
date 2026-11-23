@@ -23,6 +23,15 @@ def to_ndarray(obj):
         return np.array(obj)
 
 
+def get_gpu_onnx_provider():
+    """ONNX Runtime provider for the GPU device: CUDA, or MIGraphX (CPU if absent) on ROCm"""
+    if torch.version.hip is not None:
+        if 'MIGraphXExecutionProvider' in onnxruntime.get_available_providers():
+            return 'MIGraphXExecutionProvider'
+        return 'CPUExecutionProvider'
+    return 'CUDAExecutionProvider'
+
+
 class LandmarkRunner(object):
     """landmark runner"""
 
@@ -33,10 +42,11 @@ class LandmarkRunner(object):
         self.dsize = kwargs.get('dsize', 224)
         self.timer = Timer()
 
-        if onnx_provider.lower() == 'cuda':
+        gpu_provider = get_gpu_onnx_provider() if onnx_provider.lower() == 'cuda' else None
+        if gpu_provider in ('CUDAExecutionProvider', 'MIGraphXExecutionProvider'):
             self.session = onnxruntime.InferenceSession(
                 ckpt_path, providers=[
-                    ('CUDAExecutionProvider', {'device_id': device_id})
+                    (gpu_provider, {'device_id': device_id})
                 ]
             )
         elif onnx_provider.lower() == 'mps':
