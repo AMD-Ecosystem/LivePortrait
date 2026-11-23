@@ -139,7 +139,7 @@ pip install -r requirements_rocm.txt
 ```
 On Linux, face detection and landmarks run on the GPU through the ONNX Runtime MIGraphX execution provider, which needs the MIGraphX runtime from your ROCm installation (e.g. `sudo apt install migraphx`). MIGraphX compiles each ONNX model on first use, which takes about a minute; set the `ORT_MIGRAPHX_MODEL_CACHE_PATH` environment variable to a directory to reuse the compiled models in later runs. Without the MIGraphX runtime, and on Windows, where ONNX Runtime has no ROCm execution provider, these models fall back to the CPU; the portrait animation networks still run on the GPU.
 
-On some AMD GPUs (seen on a Radeon PRO W7800), Animals mode with half precision produces black boxes because an FP16 Winograd convolution in MIOpen overflows. Run it with `--no_flag_use_half_precision`, or set the environment variable `MIOPEN_DEBUG_CONV_WINOGRAD=0` to keep half precision without the Winograd convolutions.
+On some AMD GPUs (seen on a Radeon PRO W7800), an FP16 Winograd convolution in MIOpen overflows in Animals mode and produces black boxes. With ROCm PyTorch, `inference_animals.py` and `app_animals.py` therefore default the environment variable `MIOPEN_DEBUG_CONV_WINOGRAD` to `0`, which turns off MIOpen's Winograd convolutions and keeps half precision correct. A value you set yourself takes precedence.
 
 ### 2. Download pretrained weights 📥
 

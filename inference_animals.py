@@ -8,10 +8,15 @@ import os
 import os.path as osp
 import tyro
 import subprocess
+import torch
 from src.config.argument_config import ArgumentConfig
 from src.config.inference_config import InferenceConfig
 from src.config.crop_config import CropConfig
 from src.live_portrait_pipeline_animal import LivePortraitPipelineAnimal
+
+if torch.version.hip is not None:
+    # Avoids an FP16 overflow in MIOpen's Winograd convolution; remove once MIOpen fixes it.
+    os.environ.setdefault("MIOPEN_DEBUG_CONV_WINOGRAD", "0")
 
 
 def partial_fields(target_class, kwargs):

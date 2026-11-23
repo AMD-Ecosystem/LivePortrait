@@ -7,6 +7,7 @@ The entrance of the gradio for animal
 import os
 import tyro
 import subprocess
+import torch
 import gradio as gr
 import os.path as osp
 from src.utils.helper import load_description
@@ -14,6 +15,10 @@ from src.gradio_pipeline import GradioPipelineAnimal
 from src.config.crop_config import CropConfig
 from src.config.argument_config import ArgumentConfig
 from src.config.inference_config import InferenceConfig
+
+if torch.version.hip is not None:
+    # Avoids an FP16 overflow in MIOpen's Winograd convolution; remove once MIOpen fixes it.
+    os.environ.setdefault("MIOPEN_DEBUG_CONV_WINOGRAD", "0")
 
 
 def partial_fields(target_class, kwargs):
