@@ -139,7 +139,7 @@ pip install -r requirements_rocm.txt
 ```
 在Linux上，人脸检测和关键点模型通过ONNX Runtime的MIGraphX执行提供程序在GPU上运行，这需要ROCm安装中的MIGraphX运行时（例如`sudo apt install migraphx`）。MIGraphX在首次使用时会编译每个ONNX模型，大约需要一分钟；将环境变量`ORT_MIGRAPHX_MODEL_CACHE_PATH`设置为一个目录，即可在之后的运行中复用编译结果。如果没有MIGraphX运行时，或在Windows上（ONNX Runtime没有ROCm执行提供程序），这些模型会回退到CPU运行；肖像动画网络仍在GPU上运行。
 
-在部分AMD GPU上（在Radeon PRO W7800上观察到），动物模式使用半精度时会出现黑块，原因是MIOpen中的FP16 Winograd卷积溢出。请使用`--no_flag_use_half_precision`运行，或设置环境变量`MIOPEN_DEBUG_AMD_WINOGRAD_FURY_RXS_F2X3=0`以保留半精度。
+在部分AMD GPU上（在Radeon PRO W7800上观察到），动物模式使用半精度时会出现黑块，原因是MIOpen中的FP16 Winograd卷积溢出。请使用`--no_flag_use_half_precision`运行，或设置环境变量`MIOPEN_DEBUG_CONV_WINOGRAD=0`以在不使用Winograd卷积的情况下保留半精度。
 
 ### 2. 下载预训练权重(Pretrained weights) 📥
 
